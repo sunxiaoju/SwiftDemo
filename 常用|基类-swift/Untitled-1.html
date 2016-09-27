@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>唤起app</title>
+</head>
+<body>
+<h1> 唤起app </h1>
+<div class="form-p">
+	<button class="btn-link" onClick="tolink()"> 打开app</button>
+</div>
+
+<script type = "text/javascript"> 
+	function tolink(){
+		window.location = 'myapp://';
+		setTimeout(function(){window.location = 'item-apps://itunes.apple.com/app/1054843703'},25)
+		}
+ </script>
+
+</body>
+</html>
