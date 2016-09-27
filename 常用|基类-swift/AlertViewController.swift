@@ -8,28 +8,60 @@
 
 import UIKit
 
-class AlertViewController: UIAlertController {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
-    }
+private let cellID = "alertCell"
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+class AlertViewController: UIAlertController,UITableViewDelegate,UITableViewDataSource {
+
+    
+    fileprivate lazy var tableview:UITableView = {
+        var tv = UITableView(frame: CGRect(x: 0, y: 0, width: 300, height: 142), style: .plain)
+        tv.delegate = self
+        tv.dataSource = self
+        tv.tableFooterView = UIView()
+        self.view.addSubview(tv)
+//        tv.translatesAutoresizingMaskIntoConstraints = false
+//       let dic = ["tv":tv]
+//        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[tv]|", options: .AlignAllLeft, metrics: nil, views: dic))
+//        
+//        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-50-[tv(142)]-50-|", options: .AlignAllLeft, metrics: nil, views: dic))
+        return tv
+    
+    }()
+    
+    var dataArr = Array<String>() {
+    
+        didSet{
+            self.tableview.reloadData()
+            
+        }
+    
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    override func viewDidLoad() {
+        super.viewDidLoad()
+//    self.view.sendSubviewToBack(self.tableview)
+//        self.view.frame = CGRectMake(0, 0, self.view.frame.width, 442)
+        
+        
     }
-    */
 
+    //MARK:============== tableviewDelegate
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return dataArr.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        var cell =  tableView.dequeueReusableCell(withIdentifier: cellID)
+        if cell == nil {
+             cell = UITableViewCell(style: .default, reuseIdentifier: cellID)
+        }
+        
+        cell?.textLabel?.text = dataArr[(indexPath as NSIndexPath).row]
+        
+        return cell!
+    }
+    
+    
 }

@@ -15,12 +15,12 @@ class AnimationCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         textLabel = UILabel(frame: self.bounds)
-        textLabel?.textColor = UIColor.whiteColor()
-        textLabel?.font = UIFont.systemFontOfSize(15)
+        textLabel?.textColor = UIColor.white
+        textLabel?.font = UIFont.systemFont(ofSize: 15)
         self.contentView.addSubview(textLabel!)
         
     }
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         self.contentView.layer.contentsScale = 5
         self.contentView.layer.masksToBounds = true
     }
@@ -35,38 +35,38 @@ class AnimationCell: UICollectionViewCell {
 class AnimationViewController: SunBaseViewController,UICollectionViewDelegate,UICollectionViewDataSource {
 
     var collectionView:UICollectionView?
-    var dataArr = ["雷达效果","点连接的线路","3D特效","2D特效","渐变动画","view简单动画"]
+    var dataArr = ["雷达效果","点连接的线路","3D特效","2D特效","渐变动画","view简单动画","测试"]
     override func viewDidLoad() {
         super.viewDidLoad()
 
         let flawOut = UICollectionViewFlowLayout()
-        flawOut.itemSize = CGSizeMake(80, 50)
+        flawOut.itemSize = CGSize(width: 80, height: 50)
         flawOut.minimumLineSpacing = 10
-        collectionView = UICollectionView(frame: CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 64), collectionViewLayout: flawOut)
-        collectionView?.backgroundColor = UIColor.whiteColor()
+        collectionView = UICollectionView(frame: CGRect(x: 0, y: 0, width: SCREEN_WIDTH, height: SCREEN_HEIGHT - 64), collectionViewLayout: flawOut)
+        collectionView?.backgroundColor = UIColor.white
         collectionView?.delegate = self
         collectionView?.dataSource = self
         self.view.addSubview(collectionView!)
-        collectionView?.registerClass(AnimationCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView?.register(AnimationCell.self, forCellWithReuseIdentifier: "cell")
         
      
     }
     
     
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return dataArr.count
     }
     
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("cell", forIndexPath: indexPath) as! AnimationCell
-        cell.textLabel?.text = dataArr[indexPath.item]
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! AnimationCell
+        cell.textLabel?.text = dataArr[(indexPath as NSIndexPath).item]
         return cell
     }
-    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
             let showVC = ShowAnimationViewController()
-            showVC.type = indexPath.item
+            showVC.type = (indexPath as NSIndexPath).item
             self.navigationController?.pushViewController(showVC, animated:  true)
         
         

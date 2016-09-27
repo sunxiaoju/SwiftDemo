@@ -9,5 +9,12 @@
 #ifndef badge_header_h
 #define badge_header_h
 
+//#import "GCDAsyncSocket.h"
+//#import "AsyncSocket.h"
+//#import "AsyncUdpSocket.h"
+//#import "GCDAsyncUdpSocket.h"
+//#import "MJRefresh.h"
+#import <objc/runtime.h>
+#import "UPPaymentControl.h"
 
 #endif /* badge_header_h */

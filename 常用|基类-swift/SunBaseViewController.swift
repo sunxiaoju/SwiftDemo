@@ -7,34 +7,54 @@
 //
 
 import UIKit
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+fileprivate func >= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l >= r
+  default:
+    return !(lhs < rhs)
+  }
+}
+
 
 //屏幕尺寸
-let SCREEN_WIDTH = UIScreen.mainScreen().bounds.width
-let SCREEN_HEIGHT = UIScreen.mainScreen().bounds.height
+let SCREEN_WIDTH = UIScreen.main.bounds.width
+let SCREEN_HEIGHT = UIScreen.main.bounds.height
 
 //系统判断
-let IOS8 = Float(UIDevice.currentDevice().systemVersion) >= 8.0 ? true:false
-let IOS9 = Float(UIDevice.currentDevice().systemVersion) >= 9.0 ? true:false
-let IOS10 = Float(UIDevice.currentDevice().systemVersion) >= 10.0 ? true:false
+let IOS8 = Float(UIDevice.current.systemVersion) >= 8.0 ? true:false
+let IOS9 = Float(UIDevice.current.systemVersion) >= 9.0 ? true:false
+let IOS10 = Float(UIDevice.current.systemVersion) >= 10.0 ? true:false
 
 
 //MARK:字体
 /** 系统字体 */
-func ksystemFont(size:CGFloat)->UIFont{
-    return UIFont.systemFontOfSize(size)
+func ksystemFont(_ size:CGFloat)->UIFont{
+    return UIFont.systemFont(ofSize: size)
 }
 /** 加粗字体 */
-func kSystemBlodFont(size:CGFloat)->UIFont{
-    return UIFont.boldSystemFontOfSize(size)
+func kSystemBlodFont(_ size:CGFloat)->UIFont{
+    return UIFont.boldSystemFont(ofSize: size)
 }
 
 //MARK:颜色
 /** r、g、b颜色 */
-func kRGB(r:CGFloat,g:CGFloat,b:CGFloat)->UIColor{
+func kRGB(_ r:CGFloat,g:CGFloat,b:CGFloat)->UIColor{
     return UIColor(red: r/255.0, green: g/255.0, blue: b/255.0, alpha: 1.0)
 }
 /** 十六进制转化字体 */
-func kHexColor(hex:NSInteger)->UIColor{
+func kHexColor(_ hex:NSInteger)->UIColor{
 
     return UIColor(red: CGFloat((hex & 0xFF0000) >> 16)/255.0, green: CGFloat((hex & 0xFF00) >> 8)/255.0, blue: CGFloat(hex & 0xFF)/255.0, alpha: 1.0)
 }
@@ -43,16 +63,16 @@ func kHexColor(hex:NSInteger)->UIColor{
 class SunBaseViewController: UIViewController {
 
     // pop
-    func popToViewController(controller:AnyClass)->Void{
+    func popToViewController(_ controller:AnyClass)->Void{
         for temp in self.navigationController!.viewControllers{
-            if temp.isKindOfClass(controller) {
+            if temp.isKind(of: controller) {
                 self.navigationController?.popToViewController(temp, animated: true)
             }
         }
     }
     
     //navBar appearance
-    func applyNavBarAppearance(color:UIColor,font:UIFont) -> Void {
+    func applyNavBarAppearance(_ color:UIColor,font:UIFont) -> Void {
         self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName:color,NSFontAttributeName:font]
     }
     //设置导航栏的背景颜色为透明的
@@ -63,17 +83,17 @@ class SunBaseViewController: UIViewController {
     func navBarHiddemLine(){
     
         self.navigationController?.navigationBar.shadowImage = UIImage()
-        self.navigationController?.navigationBar.translucent = false
+        self.navigationController?.navigationBar.isTranslucent = false
     
     }
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = UIColor.whiteColor()
-
-
+        self.view.backgroundColor = UIColor.white
     }
-
+    
+    
+   
 
 }

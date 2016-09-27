@@ -32,6 +32,8 @@ class ShowAnimationViewController: SunBaseViewController {
             planeAnimation()
         }else if type == 5{
             viewAnimation()
+        }else if type == 6{
+            ceshi()
         }
     
     }
@@ -42,14 +44,13 @@ class ShowAnimationViewController: SunBaseViewController {
     
         for i in 0..<5{
         
-        let imageV = UIImageView(frame: CGRectMake(0, 0, 60, 60))
+        let imageV = UIImageView(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
             imageV.center = self.view.center
             imageV.image = UIImage(named: "time_check")
             
           let group = createAnimationGroup()
             group.beginTime = CFTimeInterval(i)
-            imageV.layer.addAnimation(group, forKey: "fasan")
-            
+            imageV.layer.add(group, forKey: "fasan")
             self.view.addSubview(imageV)
         
         
@@ -73,18 +74,20 @@ class ShowAnimationViewController: SunBaseViewController {
         groups.repeatCount = FLT_MAX
         groups.autoreverses = false
         groups.animations = [animation1,animation2]
+        //指定动画完成就移除
+        groups.isRemovedOnCompletion = true
         return groups
     }
     
     //MARK:++++++++ 多个点连接出来的线路动画
     
     func pointsJoinlines() -> Void {
-        let view  = UIView(frame: CGRectMake(0,0,50,50))
-        view.backgroundColor = UIColor.redColor()
+        let view  = UIView(frame: CGRect(x: 0,y: 0,width: 50,height: 50))
+        view.backgroundColor = UIColor.red
         view.center = self.view.center
         self.view.addSubview(view)
         let keyFrame = keyFrameAniamtion(setValues(), time: 10, repeatCount: FLT_MAX)
-        view.layer.addAnimation(keyFrame, forKey: nil)
+        view.layer.add(keyFrame, forKey: nil)
         
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ShowAnimationViewController.tapClick)))
         
@@ -94,24 +97,24 @@ class ShowAnimationViewController: SunBaseViewController {
     }
     
     func setValues() -> [NSValue] {
-        let v0 = NSValue(CGPoint: self.view.center)
-       let v1 =  NSValue(CGPoint: CGPointMake(25, 254))
-       let v2 = NSValue(CGPoint: CGPointMake(160, 89))
-        let v3 = NSValue(CGPoint: CGPointMake(295, 254))
-        let v4 = NSValue(CGPoint: CGPointMake(160, SCREEN_HEIGHT - 25))
-        let v5 = NSValue(CGPoint: CGPointMake(25, 254))
-        let v6 = NSValue(CGPoint: self.view.center)
+        let v0 = NSValue(cgPoint: self.view.center)
+       let v1 =  NSValue(cgPoint: CGPoint(x: 25, y: 254))
+       let v2 = NSValue(cgPoint: CGPoint(x: 160, y: 89))
+        let v3 = NSValue(cgPoint: CGPoint(x: 295, y: 254))
+        let v4 = NSValue(cgPoint: CGPoint(x: 160, y: SCREEN_HEIGHT - 25))
+        let v5 = NSValue(cgPoint: CGPoint(x: 25, y: 254))
+        let v6 = NSValue(cgPoint: self.view.center)
         
         return [v0,v1,v2,v3,v4,v5,v6]
         ;
         
     }
     
-    func keyFrameAniamtion(values:[AnyObject],time:CFTimeInterval,repeatCount:Float) -> CAKeyframeAnimation {
+    func keyFrameAniamtion(_ values:[AnyObject],time:CFTimeInterval,repeatCount:Float) -> CAKeyframeAnimation {
         
         let animation = CAKeyframeAnimation(keyPath: "position")
         animation.values = values
-        animation.removedOnCompletion = false
+        animation.isRemovedOnCompletion = false
         //动画完成之后view展示的位置 removed/Backwards:坐标位置 Forwards/Both：动画结束的位置
         animation.fillMode = kCAFillModeRemoved
         animation.autoreverses = false
@@ -123,7 +126,7 @@ class ShowAnimationViewController: SunBaseViewController {
     //MARK:+++++++++ 3D效果展示
     func TranSlation3D() -> Void{
         
-        let iv = UIImageView(frame: CGRectMake(0, 0, 60, 60))
+        let iv = UIImageView(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
         iv.image = UIImage(named: "AppIcon60")
         iv.center = self.view.center
         self.view.addSubview(iv)
@@ -169,10 +172,10 @@ class ShowAnimationViewController: SunBaseViewController {
 //        }
         
         //图片旋转动画
-        UIView.animateWithDuration(3) {
+        UIView.animate(withDuration: 3, animations: {
             let animation1 = CATransform3DMakeRotation(60 * CGFloat(M_PI/180), 0, 0, -1)
             iv.layer.transform = animation1
-        }
+        }) 
       
     
     }
@@ -215,28 +218,28 @@ class ShowAnimationViewController: SunBaseViewController {
      
      */
     func affineTransform() -> Void {
-        let iv = UIImageView(frame: CGRectMake(0, 0, 60, 60))
+        let iv = UIImageView(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
         iv.image = UIImage(named: "AppIcon60")
         iv.center = self.view.center
         self.view.addSubview(iv)
         
     
-        UIView.animateWithDuration(3, animations: {
+        UIView.animate(withDuration: 3, animations: {
             //平移
-            _ = CGAffineTransformMakeTranslation(50, 50);
+            _ = CGAffineTransform(translationX: 50, y: 50);
             //缩放
-            let transform2 = CGAffineTransformMakeScale(2, 2);
+            let transform2 = CGAffineTransform(scaleX: 2, y: 2);
             //旋转
-            _ = CGAffineTransformMakeRotation(90*CGFloat(M_PI)/180);
+            _ = CGAffineTransform(rotationAngle: 90*CGFloat(M_PI)/180);
             
-            let transform4 = CGAffineTransformTranslate(transform2, 100, 100);
-            let transform5 = CGAffineTransformRotate(transform4, 90*CGFloat(M_PI)/180);
+            let transform4 = transform2.translatedBy(x: 100, y: 100);
+            let transform5 = transform4.rotated(by: 90*CGFloat(M_PI)/180);
             iv.transform = transform5
             
-        }) { (finish:Bool) in
+        }, completion: { (finish:Bool) in
             //动画完成回到原来的位置
-            iv.transform = CGAffineTransformIdentity
-        }
+            iv.transform = CGAffineTransform.identity
+        }) 
         
         
         
@@ -285,20 +288,20 @@ class ShowAnimationViewController: SunBaseViewController {
 
     func planeAnimation() -> Void {
         
-        let iv = UIImageView(frame: CGRectMake(0, 0, 200, 200))
+        let iv = UIImageView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
         iv.image = UIImage(named: "jiangnan")
         iv.center = self.view.center
         self.view.addSubview(iv)
         //添加阴影效果
         //阴影偏移量
-        iv.layer.shadowOffset = CGSizeMake(20, 20)
+        iv.layer.shadowOffset = CGSize(width: 20, height: 20)
         //阴影范围
         iv.layer.shadowRadius = 10
         //阴影透明度
         iv.layer.shadowOpacity = 0.7
         
         
-        dispatch_after(dispatch_time(3, 3), dispatch_get_main_queue()) { 
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime(uptimeNanoseconds: 3 + 3/NSEC_PER_SEC)) {
             let  animation = CATransition()
             animation.duration = 1
             animation.repeatCount = 5
@@ -306,7 +309,7 @@ class ShowAnimationViewController: SunBaseViewController {
             animation.type = "pageCurl"
             //动画的副类型。动画执行的方向。
             animation.subtype = kCATransitionFromBottom
-            iv.layer.addAnimation(animation, forKey: nil)
+            iv.layer.add(animation, forKey: nil)
         }
   
 
@@ -315,7 +318,7 @@ class ShowAnimationViewController: SunBaseViewController {
     
     //MARK:========= UIView简单的动画
     func viewAnimation() -> Void {
-        let iv = UIImageView(frame: CGRectMake(0, 0, 60, 60))
+        let iv = UIImageView(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
         iv.image = UIImage(named: "jiangnan")
         iv.center = self.view.center
         self.view.addSubview(iv)
@@ -327,12 +330,12 @@ class ShowAnimationViewController: SunBaseViewController {
         //动画时长
         UIView.setAnimationDuration(3)
         //动画曲线
-        UIView.setAnimationCurve(.EaseInOut)
+        UIView.setAnimationCurve(.easeInOut)
         //重复次数
         UIView.setAnimationRepeatCount(5)
         //设置动画块中的动画效果是否回复，回复是当动画向前播放结束後再向后重头播放
         UIView.setAnimationRepeatAutoreverses(true)
-        iv.frame = CGRectMake(0, 64, 60, 60)
+        iv.frame = CGRect(x: 0, y: 64, width: 60, height: 60)
         UIView.commitAnimations()
 
         //设置动画回调函数
@@ -343,6 +346,24 @@ class ShowAnimationViewController: SunBaseViewController {
      
     }
     
+    
+    //MARK:++++++++ 测试  
+    func ceshi(){
+        let image_line = UIImageView(frame: CGRect(x: 0, y: 64, width: 100, height: 20))
+        self.view.addSubview(image_line)
+        image_line.backgroundColor = UIColor.red
+        
+        
+        let frameAnimation = CABasicAnimation(keyPath: "position.y")
+        frameAnimation.duration = 3;
+        frameAnimation.fromValue = -2;
+        frameAnimation.toValue   =  284;
+        frameAnimation.repeatCount = HUGE;
+        image_line.layer.add(frameAnimation, forKey: "position.y")
+//        [image_line.layer addAnimation:frameAnimation forKey:@"position.y"];
+    
+    
+    }
     
     
     override func didReceiveMemoryWarning() {

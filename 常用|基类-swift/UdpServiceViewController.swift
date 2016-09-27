@@ -12,24 +12,13 @@ class UdpServiceViewController: SunBaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
+        SunTcpSocket.share.port = 8080
+        SunTcpSocket.share.startConnectSocket()
+        
+        let criView = CricuitView(frame: CGRect(x: 0,y: 100,width: SCREEN_WIDTH,height: 150))
+        self.view.addSubview(criView)
+        criView.makeCricuitImage(["green","red","blue","jiangnan"])
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
     }
-    */
 
 }

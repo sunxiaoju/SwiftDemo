@@ -18,6 +18,14 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     /** 设置焦距 */
     var effectiveScale:CGFloat = 1.0
     var beginScale:CGFloat = 1.0
+    var iv:UIImageView?
+    
+    lazy var fouceView:UIImageView = {
+        let iv = UIImageView(image: UIImage(named: "focus-crosshair"))
+        iv.frame = CGRect(x: 0, y: 0, width: 73, height: 73)
+        iv.isHidden = true
+        return iv
+    }()
     
     //捕获设备 设置前置摄像头、后置摄像头、麦克风
     var device:AVCaptureDevice?
@@ -34,8 +42,8 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     
     //与输入输出结合开启摄像头
     lazy var session:AVCaptureSession = {
-        let session = AVCaptureSession()
-        session.sessionPreset = AVCaptureSessionPreset640x480
+        let session = AVCaptureSession()  
+        session.sessionPreset = AVCaptureSessionPresetPhoto
         
         //输入输出设备的结合
         if session.canAddInput(self.input){
@@ -51,31 +59,39 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     lazy var previewLayer:AVCaptureVideoPreviewLayer = {
         
         let perLayer = AVCaptureVideoPreviewLayer(session: self.session)
-        perLayer.frame = CGRectMake(10,70,300,300)
-        perLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
-        self.view.layer.addSublayer(perLayer)
-        return perLayer
+        perLayer?.frame = CGRect(x: 10,y: 70,width: 300,height: 300)
+        perLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
+        self.view.layer.addSublayer(perLayer!)
+        return perLayer!
     }()
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.edgesForExtendedLayout = .None
+        self.edgesForExtendedLayout = UIRectEdge()
+        self.device = createWithPosition(.back)
+    
         if canUserCamera() == false || self.device == nil{
             return
         }
+        try! self.device?.lockForConfiguration()
+        self.device?.flashMode = .auto
+        self.device?.unlockForConfiguration()
         
-        
-        self.device = createWithPosition(.Back)
         self.session.startRunning()
-        self.previewLayer.frame = CGRectMake(0, 49, SCREEN_WIDTH, SCREEN_HEIGHT - 49 - 64 - 100)
+        self.previewLayer.frame = CGRect(x: 0, y: 49, width: SCREEN_WIDTH, height: SCREEN_HEIGHT - 49 - 64 - 100)
+         iv = UIImageView(frame: CGRect(x: 0, y: 49, width: SCREEN_WIDTH, height: SCREEN_HEIGHT - 49 - 64 - 100))
+        iv!.image = UIImage(named: "grid")
+        iv!.alpha = 0.6
+        self.view.addSubview(iv!)
         makeTools()
         let btn = UIButton()
-        btn.frame = CGRectMake(0, 0, 60, 60)
-        btn.center = CGPointMake(SCREEN_WIDTH/2, SCREEN_HEIGHT - 64 - 50)
-        btn.backgroundColor = UIColor.redColor()
-        btn.addTarget(self, action: #selector(SunCameraViewController.getCameraPhoto), forControlEvents: .TouchUpInside)
+        btn.frame = CGRect(x: 0, y: 0, width: 60, height: 60)
+        btn.center = CGPoint(x: SCREEN_WIDTH/2, y: SCREEN_HEIGHT - 64 - 50)
+        btn.backgroundColor = UIColor.red
+        btn.setBackgroundImage(UIImage(named: "take-snap"), for: UIControlState())
+        btn.addTarget(self, action: #selector(SunCameraViewController.getCameraPhoto), for: .touchUpInside)
         self.view.addSubview(btn)
         
         self.view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(SunCameraViewController.tapClick(_:))))
@@ -87,8 +103,8 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     
     //MARK:=====检查相机权限
     func canUserCamera() -> Bool {
-        let authStatus = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo)
-        if authStatus == AVAuthorizationStatus.Denied || authStatus == AVAuthorizationStatus.Restricted {
+        let authStatus = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+        if authStatus == AVAuthorizationStatus.denied || authStatus == AVAuthorizationStatus.restricted {
             return false
         }
         return true
@@ -98,21 +114,31 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     
     func makeTools() -> Void {
         
-      let toobar = UIToolbar(frame: CGRectMake(0,0,SCREEN_WIDTH,49))
-    self.view.addSubview(toobar)
+      let toolbar = UIToolbar(frame: CGRect(x: 0,y: 0,width: SCREEN_WIDTH,height: 49))
+        toolbar.backgroundColor = UIColor.black
+        self.view.addSubview(toolbar)
     
-        let btnBar = UIBarButtonItem(title: "录像", style: .Plain, target: self, action: #selector(SunCameraViewController.startVideoRecorder))
-          let stopBar = UIBarButtonItem(title: "停止录像", style: .Plain, target: self, action: #selector(SunCameraViewController.stopVideoRecorder))
-        let changeBtn = UIBarButtonItem(title: "切换", style: .Plain, target: self, action: #selector(SunCameraViewController.changeCamera))
-        let flashBtn = UIBarButtonItem(title: "闪光灯", style: .Plain, target: self, action: #selector(SunCameraViewController.setFlash))
-        let space = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: self, action: nil)
-        toobar.items = [btnBar,space,stopBar,space,flashBtn,space,changeBtn]
+        let flashB = UIButton(type: .custom)
+        flashB.setImage(UIImage(named: "flash-auto"), for: UIControlState())
+        flashB.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+        flashB.addTarget(self, action: #selector(SunCameraViewController.setFlash(_:)), for: .touchUpInside)
+        let flashBtn = UIBarButtonItem(customView: flashB)
+        
+        
+        
+//        let  
+        let btnBar = UIBarButtonItem(title: "录像", style: .plain, target: self, action: #selector(SunCameraViewController.startVideoRecorder))
+          let stopBar = UIBarButtonItem(title: "停止录像", style: .plain, target: self, action: #selector(SunCameraViewController.stopVideoRecorder))
+        let changeBtn = UIBarButtonItem(image: UIImage(named: "front-camera"), style: .plain, target: self, action:  #selector(SunCameraViewController.changeCamera))
+        
+        let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
+        toolbar.items = [flashBtn,space,btnBar,space,stopBar,space,changeBtn]
     
     }
     //MARK:+++++++创建设备
-    func createWithPosition(position:AVCaptureDevicePosition) -> AVCaptureDevice? {
-        let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
-        for item in devices {
+    func createWithPosition(_ position:AVCaptureDevicePosition) -> AVCaptureDevice? {
+        let devices = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo)
+        for item in devices! {
             if (item as! AVCaptureDevice).position == position {
                 return item as? AVCaptureDevice
             }
@@ -123,35 +149,33 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     //MARK:获取拍照的手机
     func getCameraPhoto(){
     
-        let conntion = self.imageOutput.connectionWithMediaType(AVMediaTypeVideo)
+        let conntion = self.imageOutput.connection(withMediaType: AVMediaTypeVideo)
         if conntion == nil {
             print("拍照失败")
             return
         }
-        
-        self.imageOutput.captureStillImageAsynchronouslyFromConnection(conntion) { (imageDatasamplebuffer, error) in
+        conntion?.videoOrientation = .portrait
+        self.imageOutput.captureStillImageAsynchronously(from: conntion) { (imageDatasamplebuffer, error) in
             if imageDatasamplebuffer == nil{
                 print(error ,"拍照失败")
                 return
             }
             let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDatasamplebuffer)
-            let image = UIImage(data: imageData)
+            let image = UIImage(data: imageData!)
             self.session.stopRunning()
             
-            
-            
             print(image)
-            let iv = UIImageView(frame: self.view.bounds)
-            iv.image = image
-            self.view.addSubview(iv)
-            self.savePhotos = true
-            self.saveImageToPhotos(image!)
-            
+//            let iv = UIImageView(frame: self.view.bounds)
+//            iv.image = image
+//            self.view.addSubview(iv)
+//            self.savePhotos = true
+//            self.saveImageToPhotos(image!)
+            self.iv?.image = image
         }
     }
     
     //MARK:=====将图片保存到相册
-    func saveImageToPhotos(image:UIImage) -> Void {
+    func saveImageToPhotos(_ image:UIImage) -> Void {
         if savePhotos == false {
             return
         }
@@ -160,7 +184,7 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     }
 
     //保存图片之后指定返回的参数必须为这3个
-    func image(image:UIImage,error:NSError?,contextInfo:AnyObject)->Void{
+    func image(_ image:UIImage,error:NSError?,contextInfo:AnyObject)->Void{
         if error == nil {
             print("保存成功")
         }else{
@@ -174,7 +198,7 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     //MARK:=====切换摄像头
     func changeCamera() -> Void {
         
-        let cameraCount = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo).count
+        let cameraCount = AVCaptureDevice.devices(withMediaType: AVMediaTypeVideo).count
         if cameraCount > 1 {
             let animation = CATransition()
             animation.duration = 0.5
@@ -183,11 +207,11 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
             var newDevice:AVCaptureDevice? = nil
             let position = self.input.device.position
             
-            if position == AVCaptureDevicePosition.Front {
-                newDevice = createWithPosition(.Back)
+            if position == AVCaptureDevicePosition.front {
+                newDevice = createWithPosition(.back)
                 animation.subtype = kCATransitionFromLeft
             }else{
-                newDevice = createWithPosition(.Front)
+                newDevice = createWithPosition(.front)
                 animation.subtype = kCATransitionFromRight
             }
             if newDevice == nil {
@@ -195,7 +219,7 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
             }
             let newInput = try? AVCaptureDeviceInput(device: newDevice!)
             
-            self.previewLayer.addAnimation(animation, forKey: nil)
+            self.previewLayer.add(animation, forKey: nil)
             
             if newInput != nil {
              
@@ -216,12 +240,14 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     }
     
     //MARK:=========控制闪光灯的开关
-    func setFlash() -> Void {
-        if self.input.device.position == .Back {
-            if self.device?.flashMode == AVCaptureFlashMode.Off {
-                changeFlash(AVCaptureFlashMode.On)
-            }else if self.device?.flashMode == AVCaptureFlashMode.On{
-                changeFlash(.Off)
+    func setFlash(_ btn:UIButton) -> Void {
+        if self.input.device.position == .back {
+            if self.device?.flashMode == AVCaptureFlashMode.off {
+                changeFlash(AVCaptureFlashMode.on)
+                btn.setImage(UIImage(named: "flash-on"),for: UIControlState())
+            }else if self.device?.flashMode == AVCaptureFlashMode.on{
+                changeFlash(.off)
+                btn.setImage(UIImage(named: "flash-off"),for: UIControlState())
             }
         }else{
         
@@ -230,12 +256,13 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
       
     }
     
-    func changeFlash(flashMode:AVCaptureFlashMode) -> Void {
+    func changeFlash(_ flashMode:AVCaptureFlashMode) -> Void {
         
        try! self.device?.lockForConfiguration()
         
         if self.device?.hasFlash == true {
             self.device?.flashMode = flashMode
+  
         }else{
             print("该设备不支持闪光灯")
         }
@@ -243,60 +270,63 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     }
     
     //MARK:===== 曝光于对焦
-    func tapClick(tap:UITapGestureRecognizer) -> Void {
-        focusAtPoint(tap.locationInView(tap.view))
+    func tapClick(_ tap:UITapGestureRecognizer) -> Void {
+        focusAtPoint(tap.location(in: tap.view))
     }
     
-    func focusAtPoint(point:CGPoint) -> Void {
+    func focusAtPoint(_ point:CGPoint) -> Void {
        
         let size = self.previewLayer.frame.size
-        let focusPoint = CGPointMake(point.y/size.height, 1-point.x/size.width)
+        let focusPoint = CGPoint(x: point.y/size.height, y: 1-point.x/size.width)
         
         try! self.device?.lockForConfiguration()
         
         //对焦模式和对焦头
-        if self.device!.isFocusModeSupported(.AutoFocus){
+        if self.device!.isFocusModeSupported(.autoFocus){
             self.device!.focusPointOfInterest = focusPoint
-            self.device?.focusMode = .AutoFocus
+            self.device?.focusMode = .autoFocus
         }
         
         //曝光模式和曝光点
-        if self.device!.isExposureModeSupported(.AutoExpose) {
+        if self.device!.isExposureModeSupported(.autoExpose) {
             self.device?.exposurePointOfInterest = focusPoint
-            self.device?.exposureMode = .AutoExpose
+            self.device?.exposureMode = .autoExpose
         }
         self.device?.unlockForConfiguration()
 //        //设置对焦动画
-//        _focusView.center = point;
-//        _focusView.hidden = NO;
-//        [UIView animateWithDuration:0.3 animations:^{
-//            _focusView.transform = CGAffineTransformMakeScale(1.25, 1.25);
-//            }completion:^(BOOL finished) {
-//            [UIView animateWithDuration:0.5 animations:^{
-//            _focusView.transform = CGAffineTransformIdentity;
-//            } completion:^(BOOL finished) {
-//            _focusView.hidden = YES;
-//            }];
-//            }];
+        fouceView.center = point;
+        fouceView.isHidden = false;
+        UIView.animate(withDuration: 0.3, animations: {
+            self.fouceView.transform = CGAffineTransform(scaleX: 1.25, y: 1.25);
+            
+        }, completion: { (finish) in
+            UIView.animate(withDuration: 0.3, animations: {
+                self.fouceView.transform = CGAffineTransform.identity;
+                
+            }, completion: { (finish) in
+                self.fouceView.isHidden = true
+            }) 
+        }) 
+     
     }
     
     //MARK:===== 缩放手势调整焦距
     
-    func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if gestureRecognizer.isKindOfClass(UIPinchGestureRecognizer.classForCoder()) {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer.isKind(of: UIPinchGestureRecognizer.classForCoder()) {
             self.beginScale = self.effectiveScale
         }
         return true
     }
     
-    func pinchClick(pinch:UIPinchGestureRecognizer)->Void{
+    func pinchClick(_ pinch:UIPinchGestureRecognizer)->Void{
     
         var alltouchesOnPreviewLayer:Bool = true
-        let numstouches = pinch.numberOfTouches()
+        let numstouches = pinch.numberOfTouches
         for i in 0..<numstouches {
-            let location = pinch.locationOfTouch(i, inView: self.view)
-            let convertedLocation = self.previewLayer.convertPoint(location, fromLayer: self.previewLayer.superlayer)
-            if self.previewLayer.containsPoint(convertedLocation) == false {
+            let location = pinch.location(ofTouch: i, in: self.view)
+            let convertedLocation = self.previewLayer.convert(location, from: self.previewLayer.superlayer)
+            if self.previewLayer.contains(convertedLocation) == false {
                 
                 alltouchesOnPreviewLayer = false
                 break
@@ -312,13 +342,13 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
                 self.effectiveScale = 1.0
             }
             
-            let maxScale = self.imageOutput.connectionWithMediaType(AVMediaTypeVideo).videoMaxScaleAndCropFactor
+            let maxScale = self.imageOutput.connection(withMediaType: AVMediaTypeVideo).videoMaxScaleAndCropFactor
             if self.effectiveScale > maxScale {
                 self.effectiveScale = maxScale
             }
             
-            UIView.animateWithDuration(0.025, animations: { 
-                self.previewLayer.setAffineTransform(CGAffineTransformMakeScale(self.effectiveScale, self.effectiveScale))
+            UIView.animate(withDuration: 0.025, animations: { 
+                self.previewLayer.setAffineTransform(CGAffineTransform(scaleX: self.effectiveScale, y: self.effectiveScale))
             })
         }
         
@@ -335,7 +365,7 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     
     /** 声音输入 */
     lazy var audioInput:AVCaptureDeviceInput = {
-        return try! AVCaptureDeviceInput(device: AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio))
+        return try! AVCaptureDeviceInput(device: AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio))
     
     }()
     
@@ -347,8 +377,8 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     //判断用户是否允许访问麦克风权限
     func canUserAudio() -> Bool {
         
-        let status = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeAudio)
-        if status == AVAuthorizationStatus.Restricted || status == AVAuthorizationStatus.Denied {
+        let status = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeAudio)
+        if status == AVAuthorizationStatus.restricted || status == AVAuthorizationStatus.denied {
             return false
         }
         return true
@@ -377,26 +407,26 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     //开始录制视频
     func startVideoRecorder() -> Void {
         vedios()
-        let moviceCon = self.movieOutput.connectionWithMediaType(AVMediaTypeVideo)
-        let avcaptureOrientation = AVCaptureVideoOrientation.Portrait
-        moviceCon.videoOrientation = avcaptureOrientation
-        moviceCon.videoScaleAndCropFactor = 1.0
-        let  path = NSHomeDirectory().stringByAppendingString("/Documents/video.mp4")
-        if self.movieOutput.recording == false {
-            self.movieOutput.startRecordingToOutputFileURL(NSURL(fileURLWithPath: path), recordingDelegate: self)
+        let moviceCon = self.movieOutput.connection(withMediaType: AVMediaTypeVideo)
+        let avcaptureOrientation = AVCaptureVideoOrientation.portrait
+        moviceCon?.videoOrientation = avcaptureOrientation
+        moviceCon?.videoScaleAndCropFactor = 1.0
+        let  path = NSHomeDirectory() + "/Documents/video.mp4"
+        if self.movieOutput.isRecording == false {
+            self.movieOutput.startRecording(toOutputFileURL: URL(fileURLWithPath: path), recordingDelegate: self)
         }
         
     }
     //停止录制
     func stopVideoRecorder() -> Void {
-        if self.movieOutput.recording {
+        if self.movieOutput.isRecording {
             self.movieOutput.stopRecording()
         }
         
         
     }
     //代理方法
-    func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!) {
+    func capture(_ captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAt outputFileURL: URL!, fromConnections connections: [Any]!, error: Error!) {
         //判断最小时间
         if CMTimeGetSeconds(captureOutput.recordedDuration) < 1.0 {
             
@@ -418,22 +448,22 @@ class SunCameraViewController: SunBaseViewController,UIGestureRecognizerDelegate
     }
     
     
-    func video(videoPath:String,error:NSError?,contextInfo:AnyObject?) -> Void {
+    func video(_ videoPath:String,error:NSError?,contextInfo:AnyObject?) -> Void {
         if error == nil{
             print("保存成功")
         }
     }
     //获取视频截图
     
-    func getVideoSnap(path:String) -> UIImage {
-        let asset = AVAsset(URL: NSURL(fileURLWithPath: path))
+    func getVideoSnap(_ path:String) -> UIImage {
+        let asset = AVAsset(url: URL(fileURLWithPath: path))
         
         let generator = AVAssetImageGenerator(asset: asset)
         let snaptime = CMTimeMake(10,10)
         /** 这个方法第一个时间是指的图片创建的时间， 第二个actualTime 是指向图片正式生成时间的指针，实际生成时间这个参数可以传NULL，如果你不关心它是什么时候诞生的。 但是第一个时间不能传入空，必须告诉它你要在哪一个时间点生成一张截图 */
-        let ImageRef = try! generator.copyCGImageAtTime(snaptime, actualTime: nil)
+        let ImageRef = try! generator.copyCGImage(at: snaptime, actualTime: nil)
      
-        return UIImage(CGImage: ImageRef)
+        return UIImage(cgImage: ImageRef)
      }
 
 }

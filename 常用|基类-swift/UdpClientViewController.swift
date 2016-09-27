@@ -7,15 +7,20 @@
 //
 
 import UIKit
-
-class UdpClientViewController: SunBaseViewController {
+import CocoaAsyncSocket
+class UdpClientViewController: SunBaseViewController,GCDAsyncSocketDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+//        SunTcpSocket.share.connectToHost("10.3.22.122", port: 8080)
 
-        // Do any additional setup after loading the view.
     }
 
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        SunUdpSocket.share.sendData("10.3.22.165", prot: 8080, msg: "hello")
+//        SunTcpSocket.share.sendData("sunxiaoju")
+  
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

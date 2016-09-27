@@ -7,15 +7,42 @@
 //
 
 import UIKit
+import WebKit
 
-class HtmlViewController: SunBaseViewController {
+class HtmlViewController: SunBaseViewController,WKNavigationDelegate,WKUIDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        let web = WKWebView(frame: self.view.bounds)
+        web.navigationDelegate = self
+        web.uiDelegate = self
+        web.load(URLRequest(url: URL(fileURLWithPath: Bundle.main.path(forResource: "Untitled-1", ofType: "html")!)))
+        self.view.addSubview(web)
+        
+        
     }
 
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        webView.evaluateJavaScript("tolink()") { (response, error) in
+            print(response,error)
+        }
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        let hostname = navigationAction.request.url?.absoluteString
+        UIApplication.shared.openURL(URL(string: "url://"+hostname!
+            )!)
+
+    }
+//    func webView(webView: WKWebView, decidePolicyForNavigationResponse navigationResponse: WKNavigationResponse, decisionHandler: (WKNavigationResponsePolicy) -> Void) {
+//        let url = navigationResponse.response.URL?.host?.lowercaseString
+//        if ((url?.containsString("myapp://")) != nil) {
+//            UIApplication.sharedApplication().openURL(navigationResponse.response.URL!)
+////            decisionHandler(WKNavigationResponse.cfg)
+//        }
+//        
+//    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

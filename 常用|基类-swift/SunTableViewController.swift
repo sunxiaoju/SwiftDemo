@@ -37,21 +37,21 @@ class SunTableViewController: SunBaseViewController,UITableViewDelegate,UITableV
     override func viewDidLoad() {
         super.viewDidLoad()
         initTableView()
-        self.navBarApperanceAlpha()
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(named: "background"), forBarMetrics: .Default)
+//        self.navBarApperanceAlpha()
+//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(named: "background"), forBarMetrics: .Default)
     }
     func initTableView() -> Void {
         tableView = UITableView(frame: CGRect.zero, style: tableStyle!)
         tableView?.delegate = self
         tableView?.dataSource = self
         tableView?.tableFooterView = UIView()
-        tableView?.backgroundColor = UIColor.whiteColor()
+        tableView?.backgroundColor = UIColor.white
         self.view.addSubview(tableView!)
-        tableView?.translatesAutoresizingMaskIntoConstraints = false
-        let dic =  ["tableView":self.tableView!]
-        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[tableView]|", options: .AlignAllLeft, metrics: nil, views: dic))
-        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-(-64)-[tableView]|", options: .AlignAllLeft, metrics: nil, views: dic))
-        self.view.layoutIfNeeded()
+//        tableView?.translatesAutoresizingMaskIntoConstraints = false
+//        let dic =  ["tableView":self.tableView!]
+//        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[tableView]|", options: .AlignAllLeft, metrics: nil, views: dic))
+//        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[tableView]|", options: .AlignAllLeft, metrics: nil, views: dic))
+//        self.view.layoutIfNeeded()
         
         if refresh! {
            //增加刷新信息
@@ -67,40 +67,39 @@ class SunTableViewController: SunBaseViewController,UITableViewDelegate,UITableV
         
     }
     
-     func scrollViewDidScroll(scrollView: UIScrollView) {
-        
-        let offset_y = scrollView.contentOffset.y
-        print(offset_y)
-        
-        if offset_y > navBarChangePoint {
-            let alpha = 1 - (navBarChangePoint + 64 - offset_y)/60
-            self.navigationController?.navigationBar.subviews.first?.alpha = alpha
-        }else{
-            self.navigationController?.navigationBar.subviews.first?.alpha = 0
-        }
-        
-    }
+//     func scrollViewDidScroll(scrollView: UIScrollView) {
+//        
+//        let offset_y = scrollView.contentOffset.y
+//        print(offset_y)
+//        
+//        if offset_y > navBarChangePoint {
+//            let alpha = 1 - (navBarChangePoint + 64 - offset_y)/60
+//            self.navigationController?.navigationBar.subviews.first?.alpha = alpha
+//        }else{
+//            self.navigationController?.navigationBar.subviews.first?.alpha = 0
+//        }
+//        
+//    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
     // MARK: - Table view data source
-     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 20
+     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 0
     }
     
     
-     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier("reuseIdentifier")
+     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        var cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier")
         if cell == nil {
-            cell = UITableViewCell(style: .Default, reuseIdentifier: "reuseIdentifier")
+            cell = UITableViewCell(style: .default, reuseIdentifier: "reuseIdentifier")
         }
-        cell?.textLabel?.text = "123"
         return cell!
     }
     
